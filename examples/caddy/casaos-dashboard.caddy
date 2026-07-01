@@ -1,0 +1,3 @@
+casaos.lab.{$DOMAIN} {
+	reverse_proxy host.docker.internal:80
+}

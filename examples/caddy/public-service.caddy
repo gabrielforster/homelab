@@ -1,0 +1,3 @@
+grafana.ext.{$DOMAIN} {
+	reverse_proxy host.docker.internal:3000
+}
