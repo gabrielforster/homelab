@@ -1,0 +1,7 @@
+# Real values — never commit. Templates (*.example) are committed instead.
+.env
+caddy/conf.d/*.caddy
+cloudflared/config.yml
+cloudflared/*.json
+apps/*/docker-compose.yml
+caddy_data/

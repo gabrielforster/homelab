@@ -1,0 +1,24 @@
+services:
+  caddy:
+    build: ./caddy
+    restart: unless-stopped
+    ports:
+      - "443:443"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - CLOUDFLARE_API_TOKEN
+      - DOMAIN
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy/conf.d:/etc/caddy/conf.d:ro
+      - ./caddy_data:/data
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --token ${TUNNEL_TOKEN}
+    environment:
+      - DOMAIN
+    volumes:
+      - ./cloudflared:/etc/cloudflared:ro

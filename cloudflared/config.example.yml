@@ -1,0 +1,9 @@
+tunnel: <TUNNEL_ID>
+credentials-file: /etc/cloudflared/<TUNNEL_ID>.json
+
+ingress:
+  - hostname: "*.ext.example.com"
+    service: https://caddy:443
+    originRequest:
+      noTLSVerify: true
+  - service: http_status:404
