@@ -77,6 +77,9 @@ cp -r examples/app apps/hello
 docker compose -f apps/hello/docker-compose.yml up -d
 ```
 
+A worked example is the full-stack Excalidraw stack (live collaboration + persistent
+shareable links) in [docs/excalidraw.md](docs/excalidraw.md).
+
 ## Layout
 
 | Path | Committed | Purpose |
