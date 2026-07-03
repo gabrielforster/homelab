@@ -1,0 +1,40 @@
+services:
+  excalidraw:
+    image: kiliandeca/excalidraw
+    restart: unless-stopped
+    ports:
+      - "3210:80"
+    environment:
+      SOCKET_SERVER_URL: https://draw-collab.lab.${DOMAIN}/
+      STORAGE_BACKEND: http
+      HTTP_STORAGE_BACKEND_URL: https://draw-storage.lab.${DOMAIN}/api/v2
+      BACKEND_V2_GET_URL: https://draw-storage.lab.${DOMAIN}/api/v2/scenes/
+      BACKEND_V2_POST_URL: https://draw-storage.lab.${DOMAIN}/api/v2/scenes/
+      LIBRARY_URL: https://libraries.excalidraw.com
+      LIBRARY_BACKEND: https://us-central1-excalidraw-room-persistence.cloudfunctions.net/libraries
+
+  excalidraw-room:
+    image: excalidraw/excalidraw-room:latest
+    restart: unless-stopped
+    ports:
+      - "3211:80"
+
+  excalidraw-storage-backend:
+    image: kiliandeca/excalidraw-storage-backend
+    restart: unless-stopped
+    ports:
+      - "3212:8080"
+    environment:
+      STORAGE_URI: redis://redis:6379
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - excalidraw_redis:/data
+
+volumes:
+  excalidraw_redis:

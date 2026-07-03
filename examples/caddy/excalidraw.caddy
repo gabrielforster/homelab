@@ -1,0 +1,11 @@
+draw.lab.{$DOMAIN} {
+	reverse_proxy host.docker.internal:3210
+}
+
+draw-collab.lab.{$DOMAIN} {
+	reverse_proxy host.docker.internal:3211
+}
+
+draw-storage.lab.{$DOMAIN} {
+	reverse_proxy host.docker.internal:3212
+}
