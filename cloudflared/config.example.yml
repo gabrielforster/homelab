@@ -6,4 +6,8 @@ ingress:
     service: https://caddy:443
     originRequest:
       noTLSVerify: true
+  - hostname: "*.pub.example.com"
+    service: https://caddy:443
+    originRequest:
+      noTLSVerify: true
   - service: http_status:404

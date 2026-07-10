@@ -1,0 +1,3 @@
+blog.pub.{$DOMAIN} {
+	reverse_proxy host.docker.internal:2368
+}

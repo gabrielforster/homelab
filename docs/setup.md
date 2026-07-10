@@ -52,9 +52,33 @@ Open `https://sonarr.lab.<domain>` from a device on your tailnet.
 - Add DNS: **CNAME** `*.ext` → `<tunnel-id>.cfargotunnel.com`, proxied (orange).
 - Point the tunnel's public hostname `*.ext.<domain>` at `https://caddy:443`.
 - Add a Cloudflare Access application on `*.ext.<domain>` with your policy (email / Google / GitHub).
+  Scope it to `*.ext.<domain>` exactly — **not** the bare `*.<domain>` wildcard, or it would
+  also gate the fully-public space below.
 - Give a service an `ext.*` block to expose it:
   ```
   cp examples/caddy/public-service.caddy caddy/conf.d/grafana.caddy
+  ```
+
+## 5b. Fully public — no authentication (optional)
+
+For services safe to leave open to anyone (a blog, a status page, a shareable link). Same
+tunnel, but the `*.pub.<domain>` space is never covered by a Cloudflare Access app, so
+requests reach the service ungated.
+
+> **Warning:** A `*.pub.<domain>` service has no authentication. Anyone on the internet who
+> knows or guesses the hostname can reach it. Only expose services that are safe fully open,
+> and that handle their own auth and hardening. Never point a `pub.*` block at an admin panel,
+> a database UI, or anything that assumes a trusted network.
+
+- Add DNS: **CNAME** `*.pub` → `<tunnel-id>.cfargotunnel.com`, proxied (orange).
+- Add the tunnel public hostname `*.pub.<domain>` → `https://caddy:443`.
+- Confirm no Cloudflare Access application covers `*.pub.<domain>` (the one from step 5 should
+  be scoped to `*.ext.<domain>` only).
+- Give a service a `pub.*` block to expose it:
+  ```
+  cp examples/caddy/fully-public-service.caddy caddy/conf.d/blog.caddy
+  # edit host/port, then:
+  docker compose exec caddy caddy reload --config /etc/caddy/Caddyfile
   ```
 
 ## 6. Verify
@@ -65,5 +89,6 @@ git ls-files | xargs grep -l "<your-domain>"
 ```
 
 The first lists every real-value file; the second returns nothing. From off the tailnet,
-`*.lab.<domain>` resolves but times out; `*.ext.<domain>` prompts Cloudflare Access.
-Confirm the host has no router port-forwards — the tunnel is outbound-only.
+`*.lab.<domain>` resolves but times out; `*.ext.<domain>` prompts Cloudflare Access;
+`*.pub.<domain>` loads with no prompt. Confirm the host has no router port-forwards — the
+tunnel is outbound-only.

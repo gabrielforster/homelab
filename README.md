@@ -5,7 +5,8 @@ Reach self-hosted services by name instead of `IP:port`, running alongside an ex
 is the only front door:
 
 - **Private** — over [Tailscale](https://tailscale.com/) at `*.lab.<domain>`.
-- **Public** — a chosen subset via [Cloudflare Tunnel + Access](https://developers.cloudflare.com/cloudflare-one/) at `*.ext.<domain>`.
+- **Public, gated** — a chosen subset via [Cloudflare Tunnel + Access](https://developers.cloudflare.com/cloudflare-one/) at `*.ext.<domain>`.
+- **Public, open** — no authentication, anyone on the internet, at `*.pub.<domain>`.
 
 Config-as-code and safe to publish: everything committed is a generic template; the real
 domain, service list, and secrets live only in gitignored files.
@@ -14,7 +15,10 @@ domain, service list, and secrets live only in gitignored files.
 flowchart LR
     dev["Your devices<br/>(on Tailscale)"] -->|"*.lab.&lt;domain&gt;"| caddy
     pub["Public internet"] -->|"*.ext.&lt;domain&gt;"| edge["Cloudflare<br/>Edge + Access"]
-    edge -->|tunnel| cfd["cloudflared"] --> caddy["Caddy :443"]
+    pub -->|"*.pub.&lt;domain&gt; (no Access)"| edgeopen["Cloudflare<br/>Edge"]
+    edge -->|tunnel| cfd["cloudflared"]
+    edgeopen -->|tunnel| cfd
+    cfd --> caddy["Caddy :443"]
     caddy --> apps["CasaOS &amp; your apps"]
 ```
 
@@ -54,6 +58,7 @@ prefix and `host.docker.internal:<port>`. `{$DOMAIN}` is filled from `.env`.
 |---|---|---|
 | `examples/caddy/private-service.caddy` | `*.lab.<domain>` | tailnet only |
 | `examples/caddy/public-service.caddy` | `*.ext.<domain>` | public, behind Cloudflare Access |
+| `examples/caddy/fully-public-service.caddy` | `*.pub.<domain>` | public, **no authentication** |
 | `examples/caddy/casaos-dashboard.caddy` | `*.lab.<domain>` | the CasaOS UI on host port 80 |
 
 ```

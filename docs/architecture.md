@@ -1,7 +1,8 @@
 # Architecture
 
 One reverse proxy (Caddy) is the only front door. Two paths reach it: Tailscale for
-private access, a Cloudflare Tunnel for the subset you choose to expose publicly.
+private access, a Cloudflare Tunnel for the subset you choose to expose publicly —
+either gated behind Cloudflare Access or fully open.
 
 ```mermaid
 flowchart LR
@@ -10,6 +11,7 @@ flowchart LR
 
     subgraph cf["Cloudflare"]
         edge["Edge + Access<br/>(SSO / OTP)"]
+        edgeopen["Edge<br/>(no Access)"]
     end
 
     subgraph host["CasaOS host (Docker)"]
@@ -22,7 +24,9 @@ flowchart LR
 
     dev -->|"*.lab.&lt;domain&gt; → 100.x"| caddy
     pub -->|"*.ext.&lt;domain&gt;"| edge
+    pub -->|"*.pub.&lt;domain&gt;"| edgeopen
     edge -->|"tunnel (outbound only)"| cfd
+    edgeopen -->|"tunnel (outbound only)"| cfd
     cfd --> caddy
     caddy --> app1
     caddy --> app2
@@ -35,6 +39,7 @@ flowchart LR
 |---|---|---|---|
 | `*.lab.<domain>` | Tailscale IP `100.x` (A record, DNS-only) | tailnet devices only | Tailscale membership |
 | `*.ext.<domain>` | Cloudflare Tunnel (CNAME, proxied) | public internet | Cloudflare Access |
+| `*.pub.<domain>` | Cloudflare Tunnel (CNAME, proxied) | public internet | **none — fully open** |
 
 A public wildcard A-record pointing at a `100.x` address resolves for everyone but is
 only *routable* from inside the tailnet — so no self-hosted DNS is needed.
@@ -60,7 +65,8 @@ Drop one file in `caddy/conf.d/` (gitignored), then reload:
 docker compose exec caddy caddy reload --config /etc/caddy/Caddyfile
 ```
 
-Use a `lab.*` hostname for private, an `ext.*` hostname for public. See `examples/caddy/`.
+Use a `lab.*` hostname for private, `ext.*` for public behind Access, `pub.*` for fully
+open. See `examples/caddy/`.
 
 ## Ports
 
@@ -75,5 +81,7 @@ Everything committed is a generic template. Real values live only in gitignored 
 |---|---|
 | `docker-compose.yml`, `caddy/`, `cloudflared/config.example.yml`, `docs/`, `examples/` | `.env`, `caddy/conf.d/*.caddy`, `cloudflared/config.yml`, `cloudflared/*.json`, `caddy_data/` |
 
-The tunnel config uses a single wildcard ingress (`*.ext.<domain> → caddy`), so even it
-names no individual service. What is public is decided only by your `ext.*` blocks.
+The tunnel config uses two wildcard ingresses (`*.ext.<domain>` and `*.pub.<domain>`, both
+→ caddy), so even it names no individual service. What is exposed is decided only by your
+`ext.*` and `pub.*` blocks; whether a name is gated is decided only by the scope of the
+Cloudflare Access app (`*.ext.<domain>`, never the bare `*.<domain>`).
