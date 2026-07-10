@@ -2,4 +2,16 @@
 	acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
 }
 
+# Tunnel leg-2 TLS terminator.
+# cloudflared dials the origin as `https://caddy:443`, so it sends SNI "caddy" — which
+# matches none of the service blocks in conf.d. With no certificate for that name Caddy
+# aborts the handshake ("remote error: tls: internal error"), which surfaces as a 502 in
+# the browser. This block presents a self-signed cert for the SNI (the tunnel sets
+# noTLSVerify, so validity is not checked). The handshake completes on SNI "caddy", then
+# Caddy routes the request to the real service by its Host header (e.g. demo.ext.<domain>).
+# strict_sni_host is off by default (no mTLS), so the SNI≠Host mismatch is allowed.
+https://caddy {
+	tls internal
+}
+
 import /etc/caddy/conf.d/*.caddy

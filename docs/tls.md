@@ -12,8 +12,16 @@ there are two independent TLS legs:
 ```
 browser ──leg 1──► Cloudflare edge ──leg 2 (tunnel)──► Caddy
           edge cert                   Caddy cert (noTLSVerify in tunnel config)
-          ▲ Cloudflare's to issue     ▲ already works
+          ▲ Cloudflare's to issue     ▲ Caddy's — see leg-2 note
 ```
+
+> **Leg-2 SNI note.** cloudflared dials the origin as `https://caddy:443`, so it sends TLS
+> SNI `caddy` — a name none of your service blocks match, which would abort the handshake
+> (`remote error: tls: internal error`, a 502 in the browser). The committed `caddy/Caddyfile`
+> handles this with a small `https://caddy { tls internal }` block that presents a
+> self-signed cert for that SNI; the handshake completes, then Caddy routes by `Host` header
+> to the real service. No action needed — it ships in the repo. (Alternatively, set the
+> tunnel's **Origin Server Name** to each public hostname so cloudflared sends a matching SNI.)
 
 Caddy's certificate secures **leg 2** only. **Leg 1** is Cloudflare's — *Cloudflare* chooses
 the certificate, and you can't hand it Caddy's (custom-cert upload is a Business-plan
