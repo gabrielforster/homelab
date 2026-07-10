@@ -32,7 +32,9 @@ docker compose exec caddy caddy reload --config /etc/caddy/Caddyfile
 ```
 
 Full walkthrough in [docs/setup.md](docs/setup.md). How it works in
-[docs/architecture.md](docs/architecture.md).
+[docs/architecture.md](docs/architecture.md). The public tiers (`*.ext`, `*.pub`) need a
+Cloudflare edge certificate for their two-level names — see [docs/tls.md](docs/tls.md)
+(Advanced Certificate Manager, ~$10/mo, or a free single-level alternative).
 
 ## Configuration
 
@@ -93,7 +95,7 @@ shareable links) in [docs/excalidraw.md](docs/excalidraw.md).
 | `caddy/` | ✅ | proxy image, global config, `conf.d/` glob |
 | `cloudflared/config.example.yml` | ✅ | wildcard tunnel ingress template |
 | `examples/` | ✅ | sample service and app configs |
-| `docs/` | ✅ | architecture and setup |
+| `docs/` | ✅ | architecture, setup, and TLS/gating |
 | `.env` | ❌ | domain and secrets |
 | `caddy/conf.d/*.caddy` | ❌ | your services (one file each) |
 | `cloudflared/config.yml`, `cloudflared/*.json` | ❌ | tunnel config and credentials |

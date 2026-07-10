@@ -51,6 +51,13 @@ Cloudflare API token. DNS-01 works even though names resolve to a private IP, an
 the wildcard, so every new subdomain is trusted immediately. This requires a custom Caddy
 build with the Cloudflare DNS module (`caddy/Dockerfile`).
 
+Caddy's certificate is the whole story only for `*.lab` — DNS-only, so the browser reaches
+Caddy directly (one TLS hop). The proxied public tiers (`*.ext`, `*.pub`) split TLS in two:
+browser → Cloudflare edge, then edge → Caddy through the tunnel. Caddy's cert secures only
+the second hop; the edge hop needs a certificate Cloudflare issues, and free Universal SSL
+does not cover two-level names. Covering them requires Advanced Certificate Manager (or
+flattening public names to one level) — see [tls.md](tls.md).
+
 ## Reaching services
 
 CasaOS apps publish ports on the host, so Caddy proxies to `host.docker.internal:<port>`

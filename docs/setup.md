@@ -47,6 +47,14 @@ Open `https://sonarr.lab.<domain>` from a device on your tailnet.
 
 ## 5. Public access (optional)
 
+> **Required first — edge certificate.** The public tiers (`*.ext`, `*.pub`) are two-level
+> subdomains served through the proxied tunnel, so Cloudflare's edge must hold a certificate
+> that covers them. Free Universal SSL does **not** (it stops at one subdomain level), and
+> without it you get `ERR_SSL_VERSION_OR_CIPHER_MISMATCH` and no Access prompt. Set this up
+> before the steps below — buy **Advanced Certificate Manager** and order an advanced cert
+> for `*.ext.<domain>` and `*.pub.<domain>` (~$10/mo). Full walkthrough, plus a free
+> single-level alternative, in [docs/tls.md](tls.md).
+
 - Create a Cloudflare Tunnel (Zero Trust → Networks → Tunnels). Copy the token into
   `TUNNEL_TOKEN` in `.env` and `docker compose up -d`.
 - Add DNS: **CNAME** `*.ext` → `<tunnel-id>.cfargotunnel.com`, proxied (orange).
