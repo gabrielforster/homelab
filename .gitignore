@@ -3,5 +3,6 @@
 caddy/conf.d/*.caddy
 cloudflared/config.yml
 cloudflared/*.json
-apps/*/docker-compose.yml
+apps/*
+!apps/.gitkeep
 caddy_data/
