@@ -55,6 +55,35 @@ Options exposed through the `.fed` file (edit `apps/frankmd/notes/.fed`, no rest
 Keys placed in `.fed` override the environment variables of the same name. Keep secrets
 (API keys) in `.fed` inside the gitignored `notes/` dir, or in `.env` — never committed.
 
+### Example `.fed` file
+
+Lives at `apps/frankmd/notes/.fed`. The container reads it on each request, so edits apply
+without a restart. It is created automatically with every key present but commented out;
+uncomment only what you want to change. `key = value`, one per line, `#` for comments.
+
+```ini
+theme = gruvbox
+locale = pt-BR
+editor_font = fira-code
+editor_font_size = 16
+preview_zoom = 100
+sidebar_visible = true
+typewriter_mode = false
+
+ai_provider = auto
+anthropic_api_key = sk-ant-...
+anthropic_model = claude-sonnet-4-20250514
+
+aws_access_key_id = your-key
+aws_secret_access_key = your-secret
+aws_s3_bucket = your-bucket
+aws_region = us-east-1
+```
+
+This sets a Gruvbox Brazilian-Portuguese editor, enables Claude for AI, and routes image
+uploads to S3. Drop any block you do not need — an empty `.fed` just uses defaults plus
+whatever the environment variables provide.
+
 ## Optional: Image Hosting (AWS S3)
 
 By default images go to the `IMAGES_PATH` volume. Set the four AWS variables (in `.env`,
